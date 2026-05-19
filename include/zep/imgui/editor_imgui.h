@@ -2,7 +2,6 @@
 #include <string>
 
 #include "zep/imgui/display_imgui.h"
-#include "zep/imgui/usb_hid_keys.h"
 
 #include "zep/editor.h"
 #include "zep/mode_standard.h"
@@ -13,6 +12,29 @@
 
 namespace Zep
 {
+
+namespace ZepImGuiInput
+{
+inline ImGuiKey DigitKey(int digit)
+{
+    return ImGuiKey(ImGuiKey_0 + digit);
+}
+
+inline ImGuiKey LetterKey(int letter)
+{
+    return ImGuiKey(ImGuiKey_A + letter);
+}
+
+inline uint32_t DigitZepKey(int digit)
+{
+    return uint32_t('0' + digit);
+}
+
+inline uint32_t LetterZepKey(int letter)
+{
+    return uint32_t('a' + letter);
+}
+}
 
 class ZepDisplay_ImGui;
 class ZepTabWindow;
@@ -165,82 +187,41 @@ public:
                     return;
                 }
             }
-            // SDL Remaps to its own scancodes; and since we can't look them up in the standard IMGui list
-            // without modifying the ImGui base code, we have special handling here for CTRL.
-            // For the Win32 case, we use VK_A (ASCII) is handled below
-#if defined(_SDL_H) || defined(ZEP_USE_SDL)
-            if (ImGui::IsKeyPressed(ImGuiKey(KEY_1)))
+            if (ImGui::IsKeyPressed(ImGuiKey_1))
             {
                 SetGlobalMode(ZepMode_Standard::StaticName());
                 handled = true;
             }
-            else if (ImGui::IsKeyPressed(ImGuiKey(KEY_2)))
+            else if (ImGui::IsKeyPressed(ImGuiKey_2))
             {
                 SetGlobalMode(ZepMode_Vim::StaticName());
                 handled = true;
             }
             else
             {
-                for (int ch = KEY_1; ch <= KEY_0; ch++)
+                for (int ch = 0; ch <= 9; ch++)
                 {
-                    if (ImGui::IsKeyPressed(ImGuiKey(ch)))
+                    if (ImGui::IsKeyPressed(ZepImGuiInput::DigitKey(ch)))
                     {
-                        pBuffer->GetMode()->AddKeyPress(ch == KEY_0 ? '0' : ch - KEY_1 + '1', mod);
+                        pBuffer->GetMode()->AddKeyPress(ZepImGuiInput::DigitZepKey(ch), mod);
                         handled = true;
                     }
                 }
-                for (int ch = KEY_A; ch <= KEY_Z; ch++)
+                for (int ch = 0; ch <= ('Z' - 'A'); ch++)
                 {
-                    if (ImGui::IsKeyPressed(ImGuiKey(ch)))
+                    if (ImGui::IsKeyPressed(ZepImGuiInput::LetterKey(ch)))
                     {
-                        pBuffer->GetMode()->AddKeyPress((ch - KEY_A) + 'a', mod);
+                        pBuffer->GetMode()->AddKeyPress(ZepImGuiInput::LetterZepKey(ch), mod);
                         handled = true;
                     }
                 }
 
-                if (ImGui::IsKeyPressed(ImGuiKey(KEY_SPACE)))
+                if (ImGui::IsKeyPressed(ImGuiKey_Space))
                 {
                     pBuffer->GetMode()->AddKeyPress(' ', mod);
                     handled = true;
                 }
             }
-#else
-            if (ImGui::IsKeyPressed(ImGuiKey('1')))
-            {
-                SetGlobalMode(ZepMode_Standard::StaticName());
-                handled = true;
-            }
-            else if (ImGui::IsKeyPressed(ImGuiKey('2')))
-            {
-                SetGlobalMode(ZepMode_Vim::StaticName());
-                handled = true;
-            }
-            else
-            {
-                for (int ch = '0'; ch <= '9'; ch++)
-                {
-                    if (ImGui::IsKeyPressed(ImGuiKey(ch)))
-                    {
-                        pBuffer->GetMode()->AddKeyPress(ch, mod);
-                        handled = true;
-                    }
-                }
-                for (int ch = 'A'; ch <= 'Z'; ch++)
-                {
-                    if (ImGui::IsKeyPressed(ImGuiKey(ch)))
-                    {
-                        pBuffer->GetMode()->AddKeyPress(ch - 'A' + 'a', mod);
-                        handled = true;
-                    }
-                }
-
-                if (ImGui::IsKeyPressed(ImGuiKey(KEY_SPACE)))
-                {
-                    pBuffer->GetMode()->AddKeyPress(' ', mod);
-                    handled = true;
-                }
-            }
-#endif
         }
 
         if (!handled)
