@@ -72,6 +72,16 @@ static std::unordered_set<std::string> glsl_identifiers = {
     "sinh", "sqrt", "srand", "strcat", "strcmp", "strerror", "time", "tolower", "toupper"
 };
 
+static std::unordered_set<std::string> metal_keywords = {
+    "#include", "alignas", "bool", "break", "case", "class", "const", "constant", "constexpr", "continue", "default", "device", "do", "else", "enum", "false", "for", "friend", "if", "in", "inline", "kernel", "namespace", "operator", "out",
+    "private", "protected", "public", "return", "static", "struct", "switch", "template", "thread", "threadgroup", "true", "typedef", "typename", "using", "void", "volatile", "while"
+};
+
+static std::unordered_set<std::string> metal_identifiers = {
+    "abs", "access", "acos", "all", "any", "asin", "atan", "ceil", "clamp", "cos", "cross", "dot", "exp", "exp2", "float2", "float3", "float4", "float4x4", "floor", "half", "half2", "half3", "half4", "int2", "int3", "int4", "intersector",
+    "length", "metal", "normalize", "pow", "ray", "raytracing", "saturate", "sin", "sqrt", "texture2d", "uint", "uint2", "uint3", "uint4"
+};
+
 static std::unordered_set<std::string> c_keywords = {
     "auto", "break", "case", "char", "const", "continue", "default", "do", "double", "else", "enum", "extern", "float", "for", "goto", "if", "inline", "int", "long", "register", "restrict", "return", "short",
     "signed", "sizeof", "static", "struct", "switch", "typedef", "union", "unsigned", "void", "volatile", "while", "_Alignas", "_Alignof", "_Atomic", "_Bool", "_Complex", "_Generic", "_Imaginary",
@@ -136,7 +146,7 @@ static std::unordered_set<std::string> janet_identifiers = {
 };
 
 static std::unordered_set<std::string> scenegraph_keywords = {
-    "pass", "post_2d", "geometry", "script", "camera", "position", "look_at", "field_of_view", "near_far", "build_as", "vs", "gs", "fs", "model", "scale", "path", "surface", "size", "format", "targets", "clear", "ray_group_triangles", "ray_group_general", "ray_group_procedural", "ray_gen", "closest_hit", "miss", "any_hit", "callable", "intersection"
+    "pass", "post_2d", "geometry", "script", "camera", "position", "look_at", "field_of_view", "near_far", "build_as", "vs", "gs", "fs", "model", "scale", "path", "surface", "size", "format", "targets", "clear", "ray_group_triangles", "ray_group_general", "ray_group_procedural", "ray_gen", "metal_ray", "closest_hit", "miss", "any_hit", "callable", "intersection"
 };
 
 static std::unordered_set<std::string> py_keywords = {
@@ -164,6 +174,10 @@ void RegisterSyntaxProviders(ZepEditor& editor)
     editor.RegisterSyntaxFactory({ ".vert", ".frag", ".geom", ".rchit", ".rgen", ".rmiss", ".glsl" }, SyntaxProvider{ "gl_shader", tSyntaxFactory([](ZepBuffer* pBuffer) {
                                                                                                                          return std::make_shared<ZepSyntax>(*pBuffer, glsl_keywords, glsl_identifiers);
                                                                                                                      }) });
+
+    editor.RegisterSyntaxFactory({ ".metal" }, SyntaxProvider{ "metal_shader", tSyntaxFactory([](ZepBuffer* pBuffer) {
+                                                                                               return std::make_shared<ZepSyntax>(*pBuffer, metal_keywords, metal_identifiers);
+                                                                                           }) });
 
     editor.RegisterSyntaxFactory({ ".hlsl", ".hlsli", ".vs", ".ps", ".gs" }, SyntaxProvider{ "hlsl_shader", tSyntaxFactory([](ZepBuffer* pBuffer) {
                                                                                                 return std::make_shared<ZepSyntax>(*pBuffer, hlsl_keywords, hlsl_identifiers);
